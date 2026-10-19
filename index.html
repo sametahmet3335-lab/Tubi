@@ -930,7 +930,7 @@ const aiP={i:0,playing:false,timer:null,voice:true};
 (async()=>{try{aiSample=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){aiSample=null}if($('view-ai')&&$('view-ai').classList.contains('active'))renderAI()})();
 function aiDefault(){if(aiSel)return;const u=me&&me.role!=='founder'?U(me.id):null;
  if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));aiSel={net:'uni',group:d||'Ortak dersler',subj:null,topic:null}}
- else aiSel={net:'lise',group:u&&u.network==='lise'?u.grade:'9',subj:null,topic:null}}
+ else aiSel={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:null,topic:null}}
 function aiSubjects(){return aiSel.net==='lise'?LISE_SUBJ[aiSel.group]:UNI_DEPT[aiSel.group]}
 function aiTopics(){const raw=aiSel.net==='lise'?(LT[aiSel.group]||{})[aiSel.subj]:UT[aiSel.subj];return raw?raw.split('|'):[]}
 function aiKey(){return [aiSel.net,aiSel.group,aiSel.subj,aiSel.topic].join('|')}
@@ -1088,7 +1088,7 @@ let notes=Store.get('tubi_notes')||null,noteReqs=Store.get('tubi_notereqs')||[],
 if(!notes){notes=[{id:'n1',net:'lise',group:'11',subj:'Matematik',title:'Trigonometri özeti: birim çember ve temel özdeşlikler',text:'sin²x + cos²x = 1, tan x = sin x / cos x. Birim çemberde açıların işaretleri bölgelere göre değişir.',imgs:[],uid:'s1',t:Date.now()-9e6,helpful:['s2']},{id:'n2',net:'uni',group:'Ortak dersler',subj:'Lineer Cebir',title:'Determinant hesaplama yöntemleri',text:'2×2 için ad−bc. 3×3 için Sarrus kuralı veya kofaktör açılımı. Satır işlemleri determinantı nasıl etkiler, sona not ettim.',imgs:[],uid:'u1',t:Date.now()-5e6,helpful:[]}];noteReqs=[{id:'r1',net:'lise',group:'11',subj:'Fizik',text:'Atışlar konusunun formül özeti olan var mı?',uid:'s3',t:Date.now()-3e6,done:null}];saveNotes()}
 function saveNotes(){return Store.set('tubi_notes',notes)&&Store.set('tubi_notereqs',noteReqs)}
 function nDefault(){if(nsel)return;const u=me&&me.role!=='founder'?U(me.id):null;
- if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));nsel={net:'uni',group:d||'Ortak dersler',subj:'Tümü'}}else nsel={net:'lise',group:u&&u.network==='lise'?u.grade:'9',subj:'Tümü'}}
+ if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));nsel={net:'uni',group:d||'Ortak dersler',subj:'Tümü'}}else nsel={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:'Tümü'}}
 function nSubs(){return ['Tümü',...(nsel.net==='lise'?LISE_SUBJ[nsel.group]:UNI_DEPT[nsel.group])]}
 function noteVisible(n){if(!me)return false;if(me.role==='founder')return true;const u=U(me.id);return n.net===u.network&&!isBlocked(n.uid)}
 function nAuthor(id){const a=U(id);if(!a)return 'Öğrenci';if(me.role==='founder')return `${a.name} (@${a.uname})`;return a.role==='teacher'?`${a.name}, ${a.branch} öğretmeni`:`${a.name.split(' ')[0]}, ${gradeText(a)}`}
@@ -1271,7 +1271,7 @@ let lsnTab='videos',reelIdx=0;const reelSum={};
 function lessonsTabs(){return `<div class="seg" style="margin-bottom:12px">${[['videos','Ders videoları'],['reels','Kısa Reels'],['rooms','Ders odaları']].map(([k,l])=>`<button class="${lsnTab===k?'on':''}" onclick="lsnTab='${k}';renderLessons()">${l}</button>`).join('')}</div>`}
 function myCurriculum(){const u=me&&me.role!=='founder'?U(me.id):null;const out=[];
  if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));[...(UNI_DEPT[d]||[]),...UNI_DEPT['Ortak dersler']].forEach(c=>(UT[c]||'').split('|').filter(Boolean).forEach(t=>out.push({net:'uni',group:d||'Ortak dersler',subj:c,topic:t})))}
- else{const g=u&&u.network==='lise'?u.grade:(lsn&&lsn.net==='lise'?lsn.group:'9');const L=LT[g]||{};Object.keys(L).forEach(sj=>L[sj].split('|').forEach(t=>out.push({net:'lise',group:g,subj:sj,topic:t})))}
+ else{const g=u&&u.network==='lise'?liseGrade(u):(lsn&&lsn.net==='lise'?lsn.group:'9');const L=LT[g]||{};Object.keys(L).forEach(sj=>L[sj].split('|').forEach(t=>out.push({net:'lise',group:g,subj:sj,topic:t})))}
  let seed=0;const key=(me?me.id:'x')+new Date().toDateString();for(const c of key)seed=(seed*31+c.charCodeAt(0))>>>0;for(let i=out.length-1;i>0;i--){seed=(seed*1103515245+12345)>>>0;const j=seed%(i+1);[out[i],out[j]]=[out[j],out[i]]}return out}
 const REEL_BG=['#1d4f9a','#7a2a6a','#1f6b54','#8a4b16','#3b2a85','#8a2f48'];
 function reelsHtml(){const l=myCurriculum();const u=me&&me.role!=='founder'?U(me.id):null;
@@ -1400,9 +1400,10 @@ const LISE_SUBJ={'9':['Matematik','Fizik','Kimya','Biyoloji','Türk Dili ve Edeb
 const UNI_DEPT={'Ortak dersler':['Matematik 1 (Calculus)','Lineer Cebir','Diferansiyel Denklemler','Fizik 1','Olasılık ve İstatistik'],'Bilgisayar Mühendisliği':['Programlamaya Giriş','Veri Yapıları','Algoritmalar','Ayrık Matematik','İşletim Sistemleri','Veritabanı Sistemleri','Bilgisayar Ağları'],'Elektrik-Elektronik Mühendisliği':['Devre Analizi','Elektronik','Sinyaller ve Sistemler','Elektromanyetik Alan Teorisi'],'Makine Mühendisliği':['Statik','Dinamik','Mukavemet','Termodinamik','Akışkanlar Mekaniği'],'İnşaat Mühendisliği':['Statik','Mukavemet','Yapı Statiği','Zemin Mekaniği'],'Tıp':['Anatomi','Fizyoloji','Biyokimya','Histoloji'],'Hukuk':['Anayasa Hukuku','Medeni Hukuk','Borçlar Hukuku','Ceza Hukuku'],'İktisat ve İşletme':['Mikroekonomi','Makroekonomi','Genel Muhasebe','Finansal Yönetim','Pazarlama'],'Psikoloji':['Psikolojiye Giriş','Gelişim Psikolojisi','Sosyal Psikoloji','Araştırma Yöntemleri']};
 let videos=Store.get('tubi_videos')||[];
 let lsn=null;
+function liseGrade(u){if(u.role!=='teacher')return u.grade;const g=String((u.classes||[])[0]||'').split('-')[0];return LISE_SUBJ[g]?g:'9'}
 function lsnDefault(){if(lsn)return;const u=me&&me.role!=='founder'?U(me.id):null;
  if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));lsn={net:'uni',group:d||'Ortak dersler',subj:null}}
- else lsn={net:'lise',group:u&&u.network==='lise'?u.grade:'9',subj:null}}
+ else lsn={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:null}}
 function lsnSubjects(){return lsn.net==='lise'?LISE_SUBJ[lsn.group]:UNI_DEPT[lsn.group]}
 function ytId(url){const m=String(url).trim().match(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function ytSearch(){const q=lsn.net==='lise'?`${lsn.group}. sınıf ${lsn.subj} konu anlatımı`:`${lsn.subj} ders anlatımı üniversite`;return ytQ(q)}
