@@ -270,7 +270,7 @@ a.sr{text-decoration:none;color:var(--text)}.sr-play{background:#3a1220;color:#f
 .ata{margin:18px 0;padding:22px 20px 18px;border-radius:20px;background:radial-gradient(circle at 50% 0%,#7a1c26 0,transparent 70%),linear-gradient(180deg,#1a0f16,#0d1220);border:1px solid #4a2230;text-align:center;position:relative;overflow:hidden}
 .ata-img{width:min(240px,66%);aspect-ratio:378/529;object-fit:cover;border-radius:14px;display:block;margin:0 auto 18px;box-shadow:0 12px 34px #000a;border:1px solid #ffffff22}
 .ata-q{margin:0;font-size:22px;line-height:1.35;font-weight:650;letter-spacing:-.3px;color:#f3f6fb}
-.ata-sig{margin-top:8px;font-family:'Great Vibes','Snell Roundhand','Apple Chancery','Segoe Script',cursive;font-size:40px;line-height:1.1;color:#e9d9b0;transform:rotate(-4deg);display:inline-block}
+.ata-sig{display:block;margin:-2px 0 12px;font-family:'Great Vibes','Snell Roundhand','Apple Chancery','Segoe Script',cursive;font-style:italic;font-size:clamp(28px,8.4vw,36px);line-height:1.15;color:#e9d9b0;letter-spacing:.3px}
 .in-viewer .gate{padding-top:calc(88px + env(safe-area-inset-top,0px))}
 .in-viewer .topbar{height:auto;padding-top:64px;padding-bottom:10px}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
@@ -432,7 +432,7 @@ function closeModal(){$('modal').classList.remove('on');const f=modalAfter;modal
 function gateHome(){
  const dban=Store.get('tubi_device_banned');
  G(`<h1>Tubi’ye hoş geldin</h1>
-<figure class="ata">${typeof ATA_PHOTO!=='undefined'&&ATA_PHOTO?`<img class="ata-img" src="${ATA_PHOTO}" alt="Mustafa Kemal Atatürk">`:''}<blockquote class="ata-q">“Bütün ümidim gençliktedir.”</blockquote><figcaption class="ata-sig">Mustafa Kemal</figcaption></figure>
+<figure class="ata">${typeof ATA_PHOTO!=='undefined'&&ATA_PHOTO?`<img class="ata-img" src="${ATA_PHOTO}" alt="Mustafa Kemal Atatürk">`:''}<div class="ata-sig">Mustafa Kemal Atatürk</div><blockquote class="ata-q">“Bütün ümidim gençliktedir.”</blockquote></figure>
 <p class="gsub">Tubi yalnızca öğrenciler ve öğretmenleri için. Lise ve üniversite iki ayrı ağdır; her öğrenci kendi sınıf grubunda ve sınıf arkadaşlarıyla kurduğu gruplarda mesajlaşabilir.</p>
 <button class="primary" style="width:100%;padding:14px" onclick="gateLogin()">Giriş yap</button>
 ${dban?'<div class="err" style="display:block">Bu cihazdaki bir hesap 3. uyarıyla kalıcı olarak kapatıldı. Bu cihazdan yeni öğrenci hesabı açılamaz.</div>':''}
@@ -929,8 +929,8 @@ let aiSample,aiSel=null,aiLesson=null,aiBusy=false,aiCtl=null,aiErr='';
 const aiP={i:0,playing:false,timer:null,voice:true};
 (async()=>{try{aiSample=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){aiSample=null}if($('view-ai')&&$('view-ai').classList.contains('active'))renderAI()})();
 function aiDefault(){if(aiSel)return;const u=me&&me.role!=='founder'?U(me.id):null;
- if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));aiSel={net:'uni',group:d||'Ortak dersler',subj:null,topic:null}}
- else aiSel={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:null,topic:null}}
+ if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));aiSel={net:'uni',group:d||'Ortak dersler',subj:(u&&u.branch)||null,topic:null}}
+ else aiSel={net:'lise',group:u&&u.network==='lise'?userGrade(u):'9',subj:(u&&u.branch)||null,topic:null}}
 function aiSubjects(){return aiSel.net==='lise'?LISE_SUBJ[aiSel.group]:UNI_DEPT[aiSel.group]}
 function aiTopics(){const raw=aiSel.net==='lise'?(LT[aiSel.group]||{})[aiSel.subj]:UT[aiSel.subj];return raw?raw.split('|'):[]}
 function aiKey(){return [aiSel.net,aiSel.group,aiSel.subj,aiSel.topic].join('|')}
@@ -1088,7 +1088,7 @@ let notes=Store.get('tubi_notes')||null,noteReqs=Store.get('tubi_notereqs')||[],
 if(!notes){notes=[{id:'n1',net:'lise',group:'11',subj:'Matematik',title:'Trigonometri özeti: birim çember ve temel özdeşlikler',text:'sin²x + cos²x = 1, tan x = sin x / cos x. Birim çemberde açıların işaretleri bölgelere göre değişir.',imgs:[],uid:'s1',t:Date.now()-9e6,helpful:['s2']},{id:'n2',net:'uni',group:'Ortak dersler',subj:'Lineer Cebir',title:'Determinant hesaplama yöntemleri',text:'2×2 için ad−bc. 3×3 için Sarrus kuralı veya kofaktör açılımı. Satır işlemleri determinantı nasıl etkiler, sona not ettim.',imgs:[],uid:'u1',t:Date.now()-5e6,helpful:[]}];noteReqs=[{id:'r1',net:'lise',group:'11',subj:'Fizik',text:'Atışlar konusunun formül özeti olan var mı?',uid:'s3',t:Date.now()-3e6,done:null}];saveNotes()}
 function saveNotes(){return Store.set('tubi_notes',notes)&&Store.set('tubi_notereqs',noteReqs)}
 function nDefault(){if(nsel)return;const u=me&&me.role!=='founder'?U(me.id):null;
- if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));nsel={net:'uni',group:d||'Ortak dersler',subj:'Tümü'}}else nsel={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:'Tümü'}}
+ if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));nsel={net:'uni',group:d||'Ortak dersler',subj:'Tümü'}}else nsel={net:'lise',group:u&&u.network==='lise'?userGrade(u):'9',subj:'Tümü'}}
 function nSubs(){return ['Tümü',...(nsel.net==='lise'?LISE_SUBJ[nsel.group]:UNI_DEPT[nsel.group])]}
 function noteVisible(n){if(!me)return false;if(me.role==='founder')return true;const u=U(me.id);return n.net===u.network&&!isBlocked(n.uid)}
 function nAuthor(id){const a=U(id);if(!a)return 'Öğrenci';if(me.role==='founder')return `${a.name} (@${a.uname})`;return a.role==='teacher'?`${a.name}, ${a.branch} öğretmeni`:`${a.name.split(' ')[0]}, ${gradeText(a)}`}
@@ -1246,7 +1246,6 @@ async function videoGate(src,where){if(me&&me.role==='founder')return true;if(!a
  modlog.unshift({t:now(),uid:me.id,word:null,where:where+' (video engellendi'+(c.reason?': '+c.reason:'')+')',n:(U(me.id).strikes||0)});saveAll();
  showModal('Video paylaşılmadı','<p>Bu video okul ortamına uygun görünmediği için paylaşılmadı.</p>'+(c.reason?`<p>Sebep: ${esc(c.reason)}</p>`:''),'Tamam');return false}}return true}
 
-
 /* ---------- v11: hikâyeler (24 saat, okul içi) ---------- */
 let stories=Store.get('tubi_stories')||[];
 function saveStories(){return Store.set('tubi_stories',stories)}
@@ -1271,16 +1270,16 @@ let lsnTab='videos',reelIdx=0;const reelSum={};
 function lessonsTabs(){return `<div class="seg" style="margin-bottom:12px">${[['videos','Ders videoları'],['reels','Kısa Reels'],['rooms','Ders odaları']].map(([k,l])=>`<button class="${lsnTab===k?'on':''}" onclick="lsnTab='${k}';renderLessons()">${l}</button>`).join('')}</div>`}
 function myCurriculum(){const u=me&&me.role!=='founder'?U(me.id):null;const out=[];
  if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));[...(UNI_DEPT[d]||[]),...UNI_DEPT['Ortak dersler']].forEach(c=>(UT[c]||'').split('|').filter(Boolean).forEach(t=>out.push({net:'uni',group:d||'Ortak dersler',subj:c,topic:t})))}
- else{const g=u&&u.network==='lise'?liseGrade(u):(lsn&&lsn.net==='lise'?lsn.group:'9');const L=LT[g]||{};Object.keys(L).forEach(sj=>L[sj].split('|').forEach(t=>out.push({net:'lise',group:g,subj:sj,topic:t})))}
+ else{const g=u&&u.network==='lise'?userGrade(u):(lsn&&lsn.net==='lise'?lsn.group:'9');const L=LT[g]||{};Object.keys(L).forEach(sj=>L[sj].split('|').forEach(t=>out.push({net:'lise',group:g,subj:sj,topic:t})))}
  let seed=0;const key=(me?me.id:'x')+new Date().toDateString();for(const c of key)seed=(seed*31+c.charCodeAt(0))>>>0;for(let i=out.length-1;i>0;i--){seed=(seed*1103515245+12345)>>>0;const j=seed%(i+1);[out[i],out[j]]=[out[j],out[i]]}return out}
 const REEL_BG=['#1d4f9a','#7a2a6a','#1f6b54','#8a4b16','#3b2a85','#8a2f48'];
 function reelsHtml(){const l=myCurriculum();const u=me&&me.role!=='founder'?U(me.id):null;
- return `<p class="gnote" style="margin-top:0">${u?`${u.network==='lise'?u.grade+'. sınıf müfredatına':esc(u.dept)+' bölümüne'} göre bu yıl göreceğin konular. Kaydırarak geç.`:'Konular'}</p><div class="reelfeed">${l.map((r,i)=>{const k=r.subj+'|'+r.topic;const q=(r.net==='lise'?(/hazırlık/.test(r.subj)?'':r.group+'. sınıf ')+r.subj+' '+r.topic:r.subj+' '+r.topic)+' özet #shorts';
+ return `<p class="gnote" style="margin-top:0">${u?`${u.network==='lise'?userGrade(u)+'. sınıf müfredatına':esc(u.dept)+' bölümüne'} göre bu yıl göreceğin konular. Kaydırarak geç.`:'Konular'}</p><div class="reelfeed">${l.map((r,i)=>{const k=r.subj+'|'+r.topic;const q=(r.net==='lise'?(/hazırlık/.test(r.subj)?'':r.group+'. sınıf ')+r.subj+' '+r.topic:r.subj+' '+r.topic)+' özet #shorts';
  return `<section class="reelcard" style="--bg:${REEL_BG[i%REEL_BG.length]}"><div class="reel-top"><span>${esc(r.subj)}</span><small>${i+1}/${l.length}</small></div><h2>${esc(r.topic)}</h2><div class="reel-sum" id="rs-${i}">${reelSum[k]?reelSum[k]:''}</div>
 <div class="reel-acts"><a class="primary" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener">▶ YouTube’da kısa video</a><button class="secondary" onclick="reelSummary(${i})">✨ 1 dakikada özet</button></div></section>`}).join('')}</div>`}
-async function reelSummary(i){const r=myCurriculum()[i];const k=r.subj+'|'+r.topic;const box=$('rs-'+i);if(reelSum[k]){box.innerHTML=reelSum[k];return}if(!aiSample){box.innerHTML='<p>Özetler Tubi’nin claude.ai’de yayınlanan sürümünde çalışır.</p>';return}
+async function reelSummary(i){const r=myCurriculum()[i];const k=r.subj+'|'+r.topic;const box=$('rs-'+i);if(!box)return;if(reelSum[k]){box.innerHTML=reelSum[k];return}if(!aiSample){box.innerHTML='<p>Özetler Tubi’nin claude.ai’de yayınlanan sürümünde çalışır.</p>';return}
  box.innerHTML='<p>Özet hazırlanıyor…</p>';try{const d=await aiSample.json(`${r.net==='lise'?r.group+'. sınıf lise':'üniversite'} öğrencisi için “${r.subj}” dersinin “${r.topic}” konusunu 1 dakikada okunacak şekilde özetle. Türkçe, doğru ve sade yaz. Yalnızca JSON döndür: {"points":["en fazla 14 kelimelik madde", "..."]} 4 madde olsun.`,{modelTier:'quick'});
- const pts=(d&&Array.isArray(d.points)?d.points:[]).slice(0,5);reelSum[k]=`<ul>${pts.map(p=>`<li>${esc(String(p))}</li>`).join('')}</ul><small>Yapay zekâ özeti; hata içerebilir.</small>`;box.innerHTML=reelSum[k]}catch(e){box.innerHTML='<p>Özet şu an alınamadı.</p>'}}
+ const pts=(d&&Array.isArray(d.points)?d.points:[]).slice(0,5);reelSum[k]=`<ul>${pts.map(p=>`<li>${esc(String(p))}</li>`).join('')}</ul><small>Yapay zekâ özeti; hata içerebilir.</small>`;($('rs-'+i)||{}).innerHTML=reelSum[k]}catch(e){($('rs-'+i)||{}).innerHTML='<p>Özet şu an alınamadı.</p>'}}
 let rooms=Store.get('tubi_rooms')||[],roomOpen=null;
 function saveRooms(){Store.set('tubi_rooms',rooms)}
 function myKeys(){if(!me)return[];if(me.role==='founder')return allKeys();const u=U(me.id);const ks=u.role==='student'?(u.approved?[stuKey(u),...groups.filter(g=>g.members.includes(u.id)).map(g=>'g:'+g.id)]:[]):teaKeys(u);return ks}
@@ -1386,6 +1385,7 @@ function onbShow(){const [e,t,d]=ONB[onbI];const last=onbI===ONB.length-1;
 <div class="gbtns">${last?'':'<button class="secondary" onclick="onbEnd()">Geç</button>'}<button class="primary" style="margin-top:0" onclick="${last?'onbEnd()':'onbI++;onbShow()'}">${last?'Başlayalım':'İleri'}</button></div>`;modalAfter=null;$('modal').classList.add('on')}
 function onbEnd(){Store.set('tubi_onb_'+me.id,1);$('modal').classList.remove('on');setTimeout(moodCheck,300)}
 
+function userGrade(u){if(!u)return '9';if(u.role==='teacher'){const g=String((u.classes||[])[0]||'9').split('-')[0];return ['9','10','11','12'].includes(g)?g:'9'}return u.grade||'9'}
 /* ---------- v5: kurucu kartı yalnızca kurucunun cihazında ---------- */
 function isFounderDevice(){return Store.get('tubi_founder_device')===true}
 let _ownerP=null;
@@ -1400,10 +1400,9 @@ const LISE_SUBJ={'9':['Matematik','Fizik','Kimya','Biyoloji','Türk Dili ve Edeb
 const UNI_DEPT={'Ortak dersler':['Matematik 1 (Calculus)','Lineer Cebir','Diferansiyel Denklemler','Fizik 1','Olasılık ve İstatistik'],'Bilgisayar Mühendisliği':['Programlamaya Giriş','Veri Yapıları','Algoritmalar','Ayrık Matematik','İşletim Sistemleri','Veritabanı Sistemleri','Bilgisayar Ağları'],'Elektrik-Elektronik Mühendisliği':['Devre Analizi','Elektronik','Sinyaller ve Sistemler','Elektromanyetik Alan Teorisi'],'Makine Mühendisliği':['Statik','Dinamik','Mukavemet','Termodinamik','Akışkanlar Mekaniği'],'İnşaat Mühendisliği':['Statik','Mukavemet','Yapı Statiği','Zemin Mekaniği'],'Tıp':['Anatomi','Fizyoloji','Biyokimya','Histoloji'],'Hukuk':['Anayasa Hukuku','Medeni Hukuk','Borçlar Hukuku','Ceza Hukuku'],'İktisat ve İşletme':['Mikroekonomi','Makroekonomi','Genel Muhasebe','Finansal Yönetim','Pazarlama'],'Psikoloji':['Psikolojiye Giriş','Gelişim Psikolojisi','Sosyal Psikoloji','Araştırma Yöntemleri']};
 let videos=Store.get('tubi_videos')||[];
 let lsn=null;
-function liseGrade(u){if(u.role!=='teacher')return u.grade;const g=String((u.classes||[])[0]||'').split('-')[0];return LISE_SUBJ[g]?g:'9'}
 function lsnDefault(){if(lsn)return;const u=me&&me.role!=='founder'?U(me.id):null;
- if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));lsn={net:'uni',group:d||'Ortak dersler',subj:null}}
- else lsn={net:'lise',group:u&&u.network==='lise'?liseGrade(u):'9',subj:null}}
+ if(u&&u.network==='uni'){const d=Object.keys(UNI_DEPT).find(k=>up(k)===up(u.dept));lsn={net:'uni',group:d||'Ortak dersler',subj:(u&&u.branch)||null}}
+ else lsn={net:'lise',group:u&&u.network==='lise'?userGrade(u):'9',subj:(u&&u.branch)||null}}
 function lsnSubjects(){return lsn.net==='lise'?LISE_SUBJ[lsn.group]:UNI_DEPT[lsn.group]}
 function ytId(url){const m=String(url).trim().match(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function ytSearch(){const q=lsn.net==='lise'?`${lsn.group}. sınıf ${lsn.subj} konu anlatımı`:`${lsn.subj} ders anlatımı üniversite`;return ytQ(q)}
@@ -1494,6 +1493,7 @@ function reportAct(rid,act){const r=reports.find(x=>x.id===rid);if(!r)return;
  if(act==='strike'){const a=U(r.author);if(a)strike(a,null,'');r.status='uyarı verildi'}else r.status='yoksayıldı';
  saveAll();renderAdmin();showToast(act==='strike'?'Yazana uyarı verildi.':'Şikayet kapatıldı.')}
 if(!users)seed();
+try{let ch=false;users.forEach(u=>{if(u.plus){delete u.plus;ch=true}});if(ch)saveAll()}catch(e){}
 try{if(window.self!==window.top)document.documentElement.classList.add('in-viewer')}catch(e){document.documentElement.classList.add('in-viewer')}
 try{runAuto()}catch(e){}
 if(!U('s9')&&!byName('ornek.lise')){users.push({id:'s9',role:'student',network:'lise',school:'Bornova Anadolu Lisesi',type:'Anadolu Lisesi',il:'İzmir',ilce:'Bornova',name:'Deniz Yılmaz',uname:'ornek.lise',birth:'2010-05-15',grade:'11',section:'A',no:'110',doc:'DEMO11010',parentPhone:'05321234567',parentVerified:true,approved:true,bio:'11-A, Bornova Anadolu Lisesi. Matematik ve fizik seviyorum.',strikes:0,muteUntil:0,suspendUntil:0,banned:false,fails:0,lockUntil:0,demo:true});saveAll()}
